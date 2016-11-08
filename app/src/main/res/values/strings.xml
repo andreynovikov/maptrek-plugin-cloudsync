@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">MapTrek Dropbox Sync</string>
+    <string name="app_key">tvjjf5z4ll5p7cj</string>
+    <string name="loginToDropbox">Login to Dropbox</string>
+    <string name="msgLoginRequired">You have to login to Dropbox account for your places to be synchronized. Places will be synced automatically in background each time you modify them.</string>
+    <string name="upload">Upload to cloud</string>
+    <string name="download">Download from cloud</string>
+    <string name="actionOverwrite">Overwrite</string>
+    <string name="actionRestore">Restore</string>
+    <string name="msgFoundOldPlacesFile">Previous backup of Places was found in cloud. Do you wish to restore it or overwrite with local one?</string>
+    <string name="actionLogout">Logout</string>
+</resources>
