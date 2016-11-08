@@ -19,7 +19,7 @@ public class GetFileInfoTask extends AsyncTask<String, Void, FileMetadata> {
     private Exception mException;
 
     public interface Callback {
-        void onGetFileInfoComplete(FileMetadata result);
+        void onDataLoaded(FileMetadata result);
 
         void onError(Exception e);
     }
@@ -36,7 +36,7 @@ public class GetFileInfoTask extends AsyncTask<String, Void, FileMetadata> {
         if (mException != null)
             mCallback.onError(mException);
         else
-            mCallback.onGetFileInfoComplete(result);
+            mCallback.onDataLoaded(result);
     }
 
     @Override

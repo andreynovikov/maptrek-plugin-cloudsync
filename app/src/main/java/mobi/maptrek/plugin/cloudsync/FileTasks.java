@@ -13,6 +13,7 @@ import java.util.Date;
 
 import mobi.maptrek.plugin.cloudsync.dropbox.DropboxClientFactory;
 import mobi.maptrek.plugin.cloudsync.dropbox.GetFileInfoTask;
+import mobi.maptrek.plugin.cloudsync.dropbox.GetPreviousVersionsTask;
 import mobi.maptrek.plugin.cloudsync.dropbox.UploadFileTask;
 
 class FileTasks {
@@ -37,6 +38,10 @@ class FileTasks {
 
     static void getCloudPlacesFileInfo(GetFileInfoTask.Callback callback) {
         new GetFileInfoTask(DropboxClientFactory.getClient(), callback).execute(waypointsFile);
+    }
+
+    static void getPlacesRevisions(GetPreviousVersionsTask.Callback callback) {
+        new GetPreviousVersionsTask(DropboxClientFactory.getClient(), callback).execute(waypointsFile);
     }
 
     static void uploadPlacesFile(Context context, Date lastModified, UploadFileTask.Callback callback) {

@@ -9,4 +9,5 @@
     <string name="actionRestore">Restore</string>
     <string name="msgFoundOldPlacesFile">Previous backup of Places was found in cloud. Do you wish to restore it or overwrite with local one?</string>
     <string name="actionLogout">Logout</string>
+    <string name="titleSelectVersion">Select version to restore</string>
 </resources>

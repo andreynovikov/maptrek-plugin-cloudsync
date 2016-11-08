@@ -14,17 +14,21 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.dropbox.core.android.Auth;
 import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.ListRevisionsResult;
 import com.dropbox.core.v2.users.FullAccount;
 
 import java.io.FileNotFoundException;
 import java.util.Date;
+import java.util.List;
 
 import mobi.maptrek.plugin.cloudsync.dropbox.DropboxClientFactory;
 import mobi.maptrek.plugin.cloudsync.dropbox.GetCurrentAccountTask;
 import mobi.maptrek.plugin.cloudsync.dropbox.GetFileInfoTask;
+import mobi.maptrek.plugin.cloudsync.dropbox.GetPreviousVersionsTask;
 import mobi.maptrek.plugin.cloudsync.dropbox.UploadFileTask;
 
 public class MainActivity extends Activity {
@@ -56,6 +60,12 @@ public class MainActivity extends Activity {
         });
 
         mDownloadButton = (ImageButton) findViewById(R.id.downloadButton);
+        mDownloadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listPlacesFileVersions();
+            }
+        });
     }
 
     @Override
@@ -157,8 +167,8 @@ public class MainActivity extends Activity {
     private void getCloudPlacesFileInfo() {
         FileTasks.getCloudPlacesFileInfo(new GetFileInfoTask.Callback() {
             @Override
-            public void onGetFileInfoComplete(FileMetadata result) {
-                mCloudPlacesFileInfo = new FileInfo(result.getSize(), result.getClientModified());
+            public void onDataLoaded(FileMetadata result) {
+                mCloudPlacesFileInfo = new FileInfo(result.getSize(), result.getClientModified(), result.getRev());
                 updateStatusMessage();
                 if (mAfterLogin) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -166,6 +176,7 @@ public class MainActivity extends Activity {
                     builder.setPositiveButton(R.string.actionRestore, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            listPlacesFileVersions();
                         }
                     });
                     builder.setNegativeButton(R.string.actionOverwrite, new DialogInterface.OnClickListener() {
@@ -210,14 +221,69 @@ public class MainActivity extends Activity {
         });
     }
 
+    private void listPlacesFileVersions() {
+        FileTasks.getPlacesRevisions(new GetPreviousVersionsTask.Callback() {
+            @Override
+            public void onDataLoaded(ListRevisionsResult result) {
+                final List<FileMetadata> revisions = result.getEntries();
+                StringBuilder[] versions = new StringBuilder[revisions.size()];
+                for (int i = 0; i < versions.length; i++) {
+                    Date modified = revisions.get(i).getClientModified();
+                    versions[i] = new StringBuilder();
+                    formatTime(versions[i], modified);
+                }
+                final int[] selection = {0};
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle(R.string.titleSelectVersion);
+                builder.setSingleChoiceItems(versions, 0, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which) {
+                        selection[0] = which;
+                    }
+                });
+                builder.setPositiveButton(R.string.actionRestore, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        downloadPlacesFileVersion(revisions.get(selection[0]));
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.e(getClass().getName(), "Failed to get revisions", e);
+            }
+        });
+
+    }
+
+    private void downloadPlacesFileVersion(FileMetadata revision) {
+        Toast.makeText(this, revision.getRev() + " " + mCloudPlacesFileInfo.revision, Toast.LENGTH_LONG).show();
+        /*
+            # Restore the file on Dropbox to a certain revision
+            print("Restoring " + BACKUPPATH + " to revision " + rev + " on Dropbox...")
+            dbx.files_restore(BACKUPPATH, rev)
+
+            # Download the specific revision of the file at BACKUPPATH to LOCALFILE
+            print("Downloading current " + BACKUPPATH + " from Dropbox, overwriting " + LOCALFILE + "...")
+            dbx.files_download_to_file(LOCALFILE, BACKUPPATH, rev)
+         */
+    }
+
+    private void formatTime(StringBuilder sb, Date date) {
+        sb.append(DateFormat.getDateFormat(MainActivity.this).format(date));
+        sb.append(" ");
+        sb.append(DateFormat.getTimeFormat(MainActivity.this).format(date));
+    }
+
     private void updateStatusMessage() {
         StringBuilder sb = new StringBuilder("My places:\n");
         if (mLocalPlacesFileInfo == null) {
             sb.append("status unknown");
         } else {
-            sb.append(DateFormat.getDateFormat(MainActivity.this).format(mLocalPlacesFileInfo.lastModified));
-            sb.append(" ");
-            sb.append(DateFormat.getTimeFormat(MainActivity.this).format(mLocalPlacesFileInfo.lastModified));
+            formatTime(sb, mLocalPlacesFileInfo.lastModified);
         }
         sb.append(" (");
         if (mCloudPlacesFileInfo == null) {
@@ -225,9 +291,7 @@ public class MainActivity extends Activity {
         } else if (mCloudPlacesFileInfo.lastModified.getTime() == 0L) {
             sb.append("never synced");
         } else if (mCloudPlacesFileInfo.lastModified.before(mLocalPlacesFileInfo.lastModified)) {
-            sb.append(DateFormat.getDateFormat(MainActivity.this).format(mCloudPlacesFileInfo.lastModified));
-            sb.append(" ");
-            sb.append(DateFormat.getTimeFormat(MainActivity.this).format(mCloudPlacesFileInfo.lastModified));
+            formatTime(sb, mCloudPlacesFileInfo.lastModified);
         } else {
             sb.append("synced");
         }
