@@ -1,5 +1,6 @@
 package mobi.maptrek.plugin.cloudsync;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -55,6 +56,9 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null)
+            actionBar.setDisplayHomeAsUpEnabled(true);
 
         mMainLayout = findViewById(R.id.mainLayout);
         mProgressBar = findViewById(R.id.progressBar);
@@ -65,7 +69,7 @@ public class MainActivity extends Activity {
         mLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Auth.startOAuth2Authentication(MainActivity.this, getString(R.string.app_key));
+                Auth.startOAuth2Authentication(MainActivity.this, getString(R.string.dropboxAppKey));
             }
         });
 
@@ -150,6 +154,9 @@ public class MainActivity extends Activity {
                 prefs.edit().remove("access-token").apply();
                 showLogin();
                 invalidateOptionsMenu();
+                return true;
+            case android.R.id.home:
+                finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

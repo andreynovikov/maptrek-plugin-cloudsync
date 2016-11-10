@@ -8,7 +8,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 24
         versionCode 1
-        versionName "1.0"
+        versionName "beta1"
     }
     buildTypes {
         release {
@@ -20,8 +20,5 @@ android {
 
 dependencies {
     compile 'com.dropbox.core:dropbox-core-sdk:2.1.2'
-    // picasso 2.5.2 doesn't have OkHttp3 support (although it exists
-    // on master). Must use OkHttp v2 and v3 until new picasso release
-    compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.squareup.okhttp3:okhttp:3.3.1'
 }

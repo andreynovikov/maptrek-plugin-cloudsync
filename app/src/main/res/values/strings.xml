@@ -1,6 +1,7 @@
 <resources>
-    <string name="app_name">MapTrek Dropbox Sync</string>
-    <string name="app_key">tvjjf5z4ll5p7cj</string>
+    <string name="dropboxAppKey" translatable="false">tvjjf5z4ll5p7cj</string>
+    <string name="appName">MapTrek Dropbox Sync</string>
+    <string name="pluginTitle">Dropbox Sync</string>
     <string name="loginToDropbox">Login to Dropbox</string>
     <string name="msgLoginRequired">You have to login to Dropbox account for your places to be synchronized. Places will be synced automatically in background each time you modify them.</string>
     <string name="upload">Upload to cloud</string>
