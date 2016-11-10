@@ -1,62 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="mobi.maptrek.plugin.cloudsync.MainActivity">
+    android:animateLayoutChanges="true">
 
-    <Button
-        android:id="@+id/loginButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:text="@string/loginToDropbox" />
-
-    <TextView
-        android:id="@+id/name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/loginButton"
-        android:gravity="center_horizontal"
-        android:textAppearance="@android:style/TextAppearance.Material.Large" />
-
-    <TextView
-        android:id="@+id/message"
+    <RelativeLayout
+        android:id="@+id/mainLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/downloadButton"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/email"
-        android:gravity="center"
-        android:textAppearance="@android:style/TextAppearance.Material.Medium" />
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        tools:context="mobi.maptrek.plugin.cloudsync.MainActivity">
 
-    <TextView
-        android:id="@+id/email"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/name"
-        android:gravity="center_horizontal"
-        android:textAppearance="@android:style/TextAppearance.Material.Medium" />
+        <Button
+            android:id="@+id/loginButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:text="@string/loginToDropbox" />
 
-    <ImageButton
-        android:id="@id/downloadButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/download"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_cloud_download"
-        android:tint="@color/colorAccent"
-        android:visibility="gone"
-        android:layout_centerHorizontal="true"
-        android:elevation="0dp" />
-</RelativeLayout>
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/loginButton"
+            android:gravity="center_horizontal"
+            android:textAppearance="@android:style/TextAppearance.Material.Large" />
+
+        <TextView
+            android:id="@+id/message"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/downloadButton"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/email"
+            android:gravity="center"
+            android:textAppearance="@android:style/TextAppearance.Material.Medium" />
+
+        <TextView
+            android:id="@+id/email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/name"
+            android:gravity="center_horizontal"
+            android:textAppearance="@android:style/TextAppearance.Material.Medium" />
+
+        <ImageButton
+            android:id="@id/downloadButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/download"
+            android:elevation="0dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_cloud_download"
+            android:tint="@color/colorAccent"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:indeterminateTint="@color/colorAccent"
+        android:visibility="gone" />
+</FrameLayout>

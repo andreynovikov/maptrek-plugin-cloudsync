@@ -2,7 +2,11 @@ package mobi.maptrek.plugin.cloudsync;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.format.DateFormat;
@@ -14,7 +18,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.dropbox.core.android.Auth;
 import com.dropbox.core.v2.files.FileMetadata;
@@ -25,6 +28,7 @@ import java.io.FileNotFoundException;
 import java.util.Date;
 import java.util.List;
 
+import mobi.maptrek.plugin.cloudsync.dropbox.DownloadFileTask;
 import mobi.maptrek.plugin.cloudsync.dropbox.DropboxClientFactory;
 import mobi.maptrek.plugin.cloudsync.dropbox.GetCurrentAccountTask;
 import mobi.maptrek.plugin.cloudsync.dropbox.GetFileInfoTask;
@@ -32,7 +36,10 @@ import mobi.maptrek.plugin.cloudsync.dropbox.GetPreviousVersionsTask;
 import mobi.maptrek.plugin.cloudsync.dropbox.UploadFileTask;
 
 public class MainActivity extends Activity {
+    public static final String BROADCAST_UPDATE = "mobi.maptrek.plugin.cloudsync.update";
 
+    private View mMainLayout;
+    private View mProgressBar;
     private Button mLoginButton;
     private TextView mMessageView;
     private ImageButton mDownloadButton;
@@ -48,6 +55,9 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mMainLayout = findViewById(R.id.mainLayout);
+        mProgressBar = findViewById(R.id.progressBar);
 
         mMessageView = (TextView) findViewById(R.id.message);
 
@@ -87,11 +97,20 @@ public class MainActivity extends Activity {
             mLoginButton.setVisibility(View.GONE);
             initAndLoadData(accessToken, false);
         }
+
+        registerReceiver(mBroadcastReceiver, new IntentFilter(BROADCAST_UPDATE));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(mBroadcastReceiver);
     }
 
     private void initAndLoadData(String accessToken, boolean forceUpdate) {
         DropboxClientFactory.init(accessToken);
         if (forceUpdate || mName == null || mEmail == null) {
+            showProgress(true);
             new GetCurrentAccountTask(DropboxClientFactory.getClient(), new GetCurrentAccountTask.Callback() {
                 @Override
                 public void onComplete(FullAccount result) {
@@ -106,6 +125,7 @@ public class MainActivity extends Activity {
                 @Override
                 public void onError(Exception e) {
                     Log.e(getClass().getName(), "Failed to get account details", e);
+                    showProgress(false);
                 }
             }).execute();
         } else {
@@ -165,11 +185,14 @@ public class MainActivity extends Activity {
     }
 
     private void getCloudPlacesFileInfo() {
+        Log.e(getClass().getName(), "getCloudPlacesFileInfo()");
+        showProgress(true);
         FileTasks.getCloudPlacesFileInfo(new GetFileInfoTask.Callback() {
             @Override
             public void onDataLoaded(FileMetadata result) {
                 mCloudPlacesFileInfo = new FileInfo(result.getSize(), result.getClientModified(), result.getRev());
                 updateStatusMessage();
+                showProgress(false);
                 if (mAfterLogin) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                     builder.setMessage(R.string.msgFoundOldPlacesFile);
@@ -201,30 +224,36 @@ public class MainActivity extends Activity {
                 } else {
                     Log.e(getClass().getName(), "Failed to get places file details", e);
                 }
+                showProgress(false);
             }
         });
     }
 
     private void uploadPlacesFile() {
+        showProgress(true);
         FileTasks.uploadPlacesFile(this, mLocalPlacesFileInfo.lastModified, new UploadFileTask.Callback() {
             @Override
             public void onUploadComplete(FileMetadata result) {
                 mCloudPlacesFileInfo = new FileInfo(result.getSize(), result.getClientModified());
                 mDownloadButton.setVisibility(View.VISIBLE);
                 updateStatusMessage();
+                showProgress(false);
             }
 
             @Override
             public void onError(Exception e) {
                 Log.e(getClass().getName(), "Failed to sync places file", e);
+                showProgress(false);
             }
         });
     }
 
     private void listPlacesFileVersions() {
+        showProgress(true);
         FileTasks.getPlacesRevisions(new GetPreviousVersionsTask.Callback() {
             @Override
             public void onDataLoaded(ListRevisionsResult result) {
+                showProgress(false);
                 final List<FileMetadata> revisions = result.getEntries();
                 StringBuilder[] versions = new StringBuilder[revisions.size()];
                 for (int i = 0; i < versions.length; i++) {
@@ -254,22 +283,28 @@ public class MainActivity extends Activity {
             @Override
             public void onError(Exception e) {
                 Log.e(getClass().getName(), "Failed to get revisions", e);
+                showProgress(false);
             }
         });
 
     }
 
     private void downloadPlacesFileVersion(FileMetadata revision) {
-        Toast.makeText(this, revision.getRev() + " " + mCloudPlacesFileInfo.revision, Toast.LENGTH_LONG).show();
-        /*
-            # Restore the file on Dropbox to a certain revision
-            print("Restoring " + BACKUPPATH + " to revision " + rev + " on Dropbox...")
-            dbx.files_restore(BACKUPPATH, rev)
+        showProgress(true);
+        FileTasks.downloadPlacesFile(this, revision, new DownloadFileTask.Callback() {
+            @Override
+            public void onDownloadComplete() {
+                mLocalPlacesFileInfo = FileTasks.getLocalPlacesFileInfo(MainActivity.this);
+                updateStatusMessage();
+                showProgress(false);
+            }
 
-            # Download the specific revision of the file at BACKUPPATH to LOCALFILE
-            print("Downloading current " + BACKUPPATH + " from Dropbox, overwriting " + LOCALFILE + "...")
-            dbx.files_download_to_file(LOCALFILE, BACKUPPATH, rev)
-         */
+            @Override
+            public void onError(Exception e) {
+                Log.e(getClass().getName(), "Failed to restore places file", e);
+                showProgress(false);
+            }
+        });
     }
 
     private void formatTime(StringBuilder sb, Date date) {
@@ -298,4 +333,17 @@ public class MainActivity extends Activity {
         sb.append(")");
         mMessageView.setText(sb);
     }
+
+    private void showProgress(boolean show) {
+        mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        mMainLayout.setVisibility(show ? View.GONE : View.VISIBLE);
+    }
+
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mLocalPlacesFileInfo = FileTasks.getLocalPlacesFileInfo(MainActivity.this);
+            getCloudPlacesFileInfo();
+        }
+    };
 }

@@ -39,7 +39,7 @@ public class SyncJobService extends JobService {
         }
 
         @Override
-        protected JobParameters doInBackground(JobParameters... params) {
+        protected JobParameters doInBackground(final JobParameters... params) {
             Log.e(TAG, "doInBackground()");
             SharedPreferences prefs = mJobService.getSharedPreferences("dropbox", Context.MODE_PRIVATE);
             String accessToken = prefs.getString("access-token", null);
@@ -63,6 +63,7 @@ public class SyncJobService extends JobService {
                 @Override
                 public void onError(Exception e) {
                     Log.e(TAG, "Failed to sync places file", e);
+                    cancel(true);
                 }
             });
             return params[0];
@@ -72,6 +73,13 @@ public class SyncJobService extends JobService {
         protected void onPostExecute(JobParameters jobParameters) {
             mJobService.jobFinished(jobParameters, false);
             Log.e(TAG, "jobFinished()");
+        }
+
+        @Override
+        protected void onCancelled(JobParameters jobParameters) {
+            super.onCancelled();
+            mJobService.jobFinished(jobParameters, true);
+            Log.e(TAG, "onCancelled()");
         }
     }
 }

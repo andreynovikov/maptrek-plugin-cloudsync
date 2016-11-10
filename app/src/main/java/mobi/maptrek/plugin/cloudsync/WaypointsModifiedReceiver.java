@@ -21,7 +21,7 @@ public class WaypointsModifiedReceiver extends BroadcastReceiver {
     private static final String TAG = WaypointsModifiedReceiver.class.getName();
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(final Context context, Intent intent) {
         ConnectivityManager cm =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -53,11 +53,18 @@ public class WaypointsModifiedReceiver extends BroadcastReceiver {
             @Override
             public void onUploadComplete(FileMetadata result) {
                 Log.e(TAG, "Upload complete");
+                context.sendBroadcast(new Intent(MainActivity.BROADCAST_UPDATE));
             }
 
             @Override
             public void onError(Exception e) {
                 Log.e(TAG, "Failed to sync places file", e);
+                JobInfo job = new JobInfo.Builder(JOB_ID, new ComponentName(context, SyncJobService.class))
+                        .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+                        .setMinimumLatency(60000)
+                        .build();
+                JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+                jobScheduler.schedule(job);
             }
         });
     }

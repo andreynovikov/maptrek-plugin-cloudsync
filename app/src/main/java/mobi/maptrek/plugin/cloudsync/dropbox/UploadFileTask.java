@@ -65,6 +65,12 @@ public class UploadFileTask extends AsyncTask<UploadFileTask.UploadInfo, Void, F
             return uploadBuilder.start().uploadAndFinish(info.stream);
         } catch (DbxException | IOException e) {
             mException = e;
+        } finally {
+            try {
+                info.stream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         return null;

@@ -7,10 +7,14 @@ import android.net.Uri;
 import android.provider.OpenableColumns;
 import android.util.Log;
 
+import com.dropbox.core.v2.files.FileMetadata;
+
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Date;
 
+import mobi.maptrek.plugin.cloudsync.dropbox.DownloadFileTask;
 import mobi.maptrek.plugin.cloudsync.dropbox.DropboxClientFactory;
 import mobi.maptrek.plugin.cloudsync.dropbox.GetFileInfoTask;
 import mobi.maptrek.plugin.cloudsync.dropbox.GetPreviousVersionsTask;
@@ -55,5 +59,18 @@ class FileTasks {
         }
         new UploadFileTask(DropboxClientFactory.getClient(), callback)
                 .execute(new UploadFileTask.UploadInfo(waypointsFile, lastModified, inputStream));
+    }
+
+    static void downloadPlacesFile(Context context, FileMetadata metadata, DownloadFileTask.Callback callback) {
+        ContentResolver contentResolver = context.getContentResolver();
+        OutputStream outputStream;
+        try {
+            outputStream = contentResolver.openOutputStream(waypointsUri, "rwt");
+        } catch (FileNotFoundException e) {
+            Log.e(FileTasks.class.getName(), "Failed to overwrite places file", e);
+            return;
+        }
+        new DownloadFileTask(DropboxClientFactory.getClient(), callback)
+                .execute(new DownloadFileTask.DownloadInfo(metadata, outputStream));
     }
 }
