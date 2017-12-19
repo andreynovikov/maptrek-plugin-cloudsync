@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="actionOverwrite">Загрузить</string>
+    <string name="actionRestore">Восстановить</string>
+    <string name="download">Загрузить из облака</string>
+    <string name="loginToDropbox">Авторизоваться в Dropbox</string>
+    <string name="msgFoundOldPlacesFile">В облаке найдена предыдущая версия ваших Точек. Вы хотите восстановить её или загрузить в облако локальную версию?</string>
+    <string name="msgLoginRequired">Вы должны авторизоваться в Dropbox, чтобы ваши Точки начали синхронизироваться. Синхронизация будет осуществляться автоматически в фоновом режиме каждый раз, когда вы их измените.</string>
+    <string name="titleSelectVersion">Выберите версию для восстановления</string>
+    <string name="upload">Сохранить в облаке</string>
+    <string name="actionLogout">Выйти из учётной записи</string>
+</resources>
