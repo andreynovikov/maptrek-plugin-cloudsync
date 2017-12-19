@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/MapTrekCloudSync.iml" filepath="$PROJECT_DIR$/MapTrekCloudSync.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/trekarta-plugin-cloudsync.iml" filepath="$PROJECT_DIR$/trekarta-plugin-cloudsync.iml" />
     </modules>
   </component>
 </project>
